@@ -124,7 +124,7 @@ static bool should_hide(DIR *dir, const char *name, const unsigned char type) {
         path = dirpaths[fd];
         fprintf(stderr, "should_hide\t\t\t\t`%s`\t\ton\t\t`%s`\t?\t", name, path);
     }
-    if (type != DT_DIR) {
+    if (type != DT_DIR) { // show anything that's not a directory
         fprintf(stderr, "NO (0)\n");
         return false;
     }
@@ -144,7 +144,7 @@ static bool should_hide(DIR *dir, const char *name, const unsigned char type) {
         fprintf(stderr, "NO (4)\n");
         return false;
     }
-    if (name[0] == '.') { // hide **/.* (but not everything underneath)
+    if (name[0] == '.') { // hide **/.* (preventing it from being traversed)
         fprintf(stderr, "YES (5)\n");
         return true;
     } else {
