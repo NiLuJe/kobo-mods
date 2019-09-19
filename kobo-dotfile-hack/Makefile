@@ -8,7 +8,7 @@ LIBS := -ldl
 
 CONF_NATIVE := -DLS_ONLY
 CONF_KOBO   := -DUSE_FULL_PATH
-#CONF_KOBO   += -DNICKEL_ONLY
+CONF_KOBO   += -DNICKEL_ONLY
 
 
 run: libhidedir.so

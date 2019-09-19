@@ -191,7 +191,9 @@ DIR *opendir(const char *name) {
 
 DIR *fdopendir(int fd) {
     if (!wrap) return fdopendir_orig(fd);
-    // note that if Kobo uses this (it doesn't currently), most of the should_hide stuff won't work
+    // NOTE: If Kobo uses this (it doesn't currently), most of the should_hide stuff won't work.
+    //       We'd probably need something like an extra fstat call to pickup the path?
+    //       That'd feel moderately less hacky than a readlink on /proc/self/fd/$fd ;).
     dirpaths[fd] = NULL;
     return fdopendir_orig(fd);
 }
