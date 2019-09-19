@@ -1,7 +1,9 @@
-CC       = $(CROSS_PREFIX)gcc
-CONFIG   = -DLS_ONLY
+CC      ?= $(CROSS_TC)-gcc
+STRIP   ?= $(CROSS_TC)-strip
+CONFIG  := -DLS_ONLY
 
-override CFLAGS := -Wall -shared -ldl -std=gnu99 -fPIC $(CONFIG) $(CFLAGS)
+override CFLAGS := $(CONFIG) -Wall -Wextra -shared -std=gnu99 -fPIC $(CFLAGS)
+LIBS := -ldl
 
 .PHONY: all clean test
 
@@ -17,4 +19,5 @@ test: all
 	LD_PRELOAD="$(PWD)/libhidedir_native.so" ls -lah $(HOME)
 
 libhidedir_native.so: hidedir.c
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(STRIP) --strip-unneeded $@

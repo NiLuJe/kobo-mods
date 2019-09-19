@@ -1,10 +1,12 @@
-CC       = $(CROSS_PREFIX)gcc
+CC      ?= $(CROSS_TC)-gcc
+STRIP   ?= $(CROSS_TC)-strip
 DESTDIR ?= /
 PREFIX  ?= /usr/local/geek1011
-CONFIG   = -DUSE_FULL_PATH -DNICKEL_ONLY
+CONFIG  := -DUSE_FULL_PATH -DNICKEL_ONLY
 CFLAGS  ?= -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb
 
-override CFLAGS := -Wall -shared -ldl -std=gnu99 -fPIC $(CONFIG) $(CFLAGS)
+override CFLAGS := $(CONFIG) -Wall -Wextra -shared -std=gnu99 -fPIC $(CFLAGS)
+LIBS := -ldl
 
 .PHONY: all install uninstall clean
 
@@ -28,7 +30,8 @@ KoboRoot.tgz: libhidedir_kobo.so ld.so.preload
 	tar tvf $@
 
 libhidedir_kobo.so: hidedir.c
-	$(CC) -o $@ $< $(CFLAGS)
+	$(CC) -o $@ $< $(CFLAGS) $(LIBS)
+	$(STRIP) --strip-unneeded $@
 
 ld.so.preload: libhidedir_kobo.so
 	echo $(PREFIX)/$< > $@
