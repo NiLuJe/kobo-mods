@@ -6,9 +6,9 @@ LIBDIR  := $(PREFIX)/lib
 BINDIR  := $(PREFIX)/bin
 CONFIG  := -DUSE_FULL_PATH -DNICKEL_ONLY
 
-# Do we want a global preload?
-ifdef GLOBAL
-	CONFIG += -DUSE_GLOBAL_PRELOAD
+# Do we want a local preload?
+ifdef LOCAL
+	CONFIG += -DUSE_LOCAL_PRELOAD
 endif
 
 CFLAGS  ?= -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb
@@ -31,7 +31,7 @@ uninstall:
 clean:
 	rm -f libhidedir_kobo.so ld.so.preload KoboRoot.tgz
 
-ifdef GLOBAL
+ifndef LOCAL
 KoboRoot.tgz: libhidedir_kobo.so ld.so.preload
 	tar czf $@ $^ --group root:0 --owner root:0 \
 		--transform "s,libhidedir_kobo.so,.$(LIBDIR)/libhidedir_kobo.so," \
