@@ -1,0 +1,11 @@
+# Binaries
+libhidedir_kobo.so
+libhidedir.so
+
+# Packages
+KoboRoot.tgz
+KoboRoot/
+
+# KDevelop
+.kdev4/
+kobo-dotfile-hack.kdev4
