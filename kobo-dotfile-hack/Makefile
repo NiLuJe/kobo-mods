@@ -1,4 +1,4 @@
-CC      ?= $(CROSS_TC)-gcc
+CC      := $(CROSS_TC)-gcc
 STRIP   ?= $(CROSS_TC)-strip
 DESTDIR ?= /
 PREFIX  ?= /usr/local/geek1011
