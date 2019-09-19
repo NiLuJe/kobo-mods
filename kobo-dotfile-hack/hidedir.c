@@ -30,10 +30,9 @@ static char *dirpaths[1024] = { 0 };    // c.f., cat /proc/$(pidof nickel)/limit
 
 #if defined(NICKEL_ONLY) || defined(LS_ONLY)
 static bool isproc(const char* proc) {
-    char buf[PATH_MAX];
+    char buf[PATH_MAX] = { 0 };
     ssize_t len;
     if ((len = readlink("/proc/self/exe", buf, PATH_MAX)) != -1) {
-        buf[len] = '\0';
         return strcmp(strrchr(buf, '/')+1, proc) == 0;
     }
     return false;
