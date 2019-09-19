@@ -26,7 +26,7 @@ mkdir -p /usr/local/geek1011/etc
 cp -a "${KOBO_RCS}" "${DBKP_RCS}"
 
 # Do we need to patch?
-if ! grep -q dotfile-hack-pre-start "${KOBO_RCS}" ; then
+if ! grep -q '^# dotfile-hack-pre-start' "${KOBO_RCS}" ; then
 	# Assume we'll have done something untoward to rcS!
 	PATCH_DONE="true"
 
@@ -39,7 +39,7 @@ if ! grep -q dotfile-hack-pre-start "${KOBO_RCS}" ; then
 fi
 
 # Do we need to patch?
-if ! grep -q dotfile-hack-post-start "${KOBO_RCS}" ; then
+if ! grep -q '^# dotfile-hack-post-start' "${KOBO_RCS}" ; then
 	# Assume we'll have done something untoward to rcS!
 	PATCH_DONE="true"
 
@@ -56,7 +56,7 @@ if [ "${PATCH_DONE}" = "true" ] ; then
 	sync
 
 	# Double-check that it was successful...
-	if grep -q dotfile-hack-pre-start "${KOBO_RCS}" && grep -q dotfile-hack-pre-end "${KOBO_RCS}" && grep -q dotfile-hack-post-start "${KOBO_RCS}" && grep -q dotfile-hack-post-end "${KOBO_RCS}" ; then
+	if grep -q '^# dotfile-hack-pre-start' "${KOBO_RCS}" && grep -q '^# dotfile-hack-pre-end' "${KOBO_RCS}" && grep -q '^# dotfile-hack-post-start' "${KOBO_RCS}" && grep -q '^# dotfile-hack-post-end' "${KOBO_RCS}" ; then
 		# Whee!
 		fbink -qmph -y 5 "[.H] Patching successful, rebooting . . ."
 
