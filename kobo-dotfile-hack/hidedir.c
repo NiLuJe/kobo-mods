@@ -25,7 +25,7 @@ static __typeof__(readdir64_r) *readdir64_r_orig = NULL;
 static __typeof__(opendir)   *opendir_orig = NULL;
 static __typeof__(fdopendir) *fdopendir_orig = NULL;
 static __typeof__(closedir)  *closedir_orig = NULL;
-static char *dirpaths[NR_OPEN] = { 0 };    // Linux default is 1024, c.f., cat /proc/$(pidof nickel)/limits
+static char *dirpaths[1024] = { 0 };    // Linux default is 1024, c.f., cat /proc/$(pidof nickel)/limits
 #endif
 
 #if defined(NICKEL_ONLY) || defined(LS_ONLY)
