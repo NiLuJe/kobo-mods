@@ -30,6 +30,7 @@ static int   (*closedir_orig)(DIR *dir);
 static char *dirpaths[1024];    // c.f., cat /proc/$(pidof nickel)/limits
 #endif
 
+#if defined(NICKEL_ONLY) || defined(LS_ONLY)
 static bool isproc(const char* proc) {
     char buf[PATH_MAX];
     ssize_t len;
@@ -39,6 +40,7 @@ static bool isproc(const char* proc) {
     }
     return false;
 }
+#endif
 
 constructor static void init() {
     #ifdef NICKEL_ONLY
