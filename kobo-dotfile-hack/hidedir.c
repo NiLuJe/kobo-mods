@@ -57,7 +57,7 @@ constructor static void init() {
     closedir_orig    = dlsym(RTLD_NEXT, "closedir");
     #endif
 
-    #ifndef USE_LOCAL_PRELOAD
+    #ifdef USE_LOCAL_PRELOAD
     // Clear the env so that what Nickel spawns doesn't inherit this hack...
     unsetenv("LD_PRELOAD");
     #endif
