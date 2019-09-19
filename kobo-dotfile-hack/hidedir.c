@@ -189,4 +189,5 @@ int closedir(DIR* dir) {
     }
     return closedir_orig(dir);
 }
-#endif
+
+#endif // !USE_FULL_PATH
