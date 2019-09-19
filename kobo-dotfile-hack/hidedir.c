@@ -56,6 +56,11 @@ constructor static void init() {
     fdopendir_orig   = dlsym(RTLD_NEXT, "fdopendir");
     closedir_orig    = dlsym(RTLD_NEXT, "closedir");
     #endif
+
+    #ifndef USE_GLOBAL_PRELOAD
+    // Clear the env so that what Nickel spawns doesn't inherit this hack...
+    unsetenv("LD_PRELOAD");
+    #endif
 }
 
 static bool should_hide(DIR *dir, const char *name, const unsigned char type);
