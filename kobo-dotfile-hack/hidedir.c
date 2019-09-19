@@ -26,7 +26,7 @@ static int              (*readdir64_r_orig)(DIR *dir, struct dirent64 *ent, stru
 static DIR  *(*opendir_orig)(const char *name);
 static DIR  *(*fdopendir_orig)(int fd);
 static int   (*closedir_orig)(DIR *dir);
-static char *dirpaths[65535];
+static char *dirpaths[1024];    // c.f., cat /proc/$(pidof nickel)/limits
 #endif
 
 static bool isproc(const char* proc) {
