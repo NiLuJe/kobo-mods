@@ -1,10 +1,9 @@
 # Binaries
-libhidedir_kobo.so
-libhidedir.so
+libhidedir_*.so
+ld.so.preload
 
 # Packages
 KoboRoot.tgz
-KoboRoot/
 
 # KDevelop
 .kdev4/

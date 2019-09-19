@@ -1,40 +1,34 @@
-.PHONY: kobo clean run
+CC       = $(CROSS_PREFIX)gcc
+DESTDIR ?= /
+PREFIX  ?= /usr/local/geek1011
+CONFIG   = -DUSE_FULL_PATH -DNICKEL_ONLY
+CFLAGS  ?= -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb
 
-CC := $(CROSS_TC)-gcc
+override CFLAGS := -Wall -shared -ldl -std=gnu99 -fPIC $(CONFIG) $(CFLAGS)
 
-override CFLAGS := -Wall -Wextra -shared -fPIC $(CFLAGS)
-KOBO_CFLAGS     ?= -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb
-LIBS := -ldl
+.PHONY: all install uninstall clean
 
-CONF_NATIVE := -DLS_ONLY
-CONF_KOBO   := -DUSE_FULL_PATH
-CONF_KOBO   += -DNICKEL_ONLY
+all: libhidedir_kobo.so ld.so.preload KoboRoot.tgz
 
+install: all
+	install -Dm 0644 libhidedir_kobo.so $(DESTDIR)$(PREFIX)
+	install -Dm 0644 ld.so.preload $(DESTDIR)/etc
 
-run: libhidedir.so
-	@echo "=== without ==="
-	ls -lah $(HOME)
-
-	@echo "=== with ==="
-	LD_PRELOAD="$(PWD)/libhidedir.so" ls -lah $(HOME)
-
-kobo: KoboRoot.tgz
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/libhidedir_kobo.so
+	rm -f $(DESTDIR)/etc/ld.so.preload
 
 clean:
-	rm -f libhidedir.so libhidedir_kobo.so KoboRoot.tgz
-	rm -rf KoboRoot
+	rm -f libhidedir_kobo.so ld.so.preload KoboRoot.tgz
 
-libhidedir.so: hidedir.c
-	$(CC) -o $@ $^ $(CONF_NATIVE) $(CFLAGS) $(LIBS)
+KoboRoot.tgz: libhidedir_kobo.so ld.so.preload
+	tar czf $@ $^ --group root:0 --owner root:0 \
+		--transform "s,libhidedir_kobo.so,.$(PREFIX)/libhidedir_kobo.so," \
+		--transform "s,ld.so.preload,./etc/ld.so.preload,"
+	tar tvf $@
 
 libhidedir_kobo.so: hidedir.c
-	$(CC) -o $@ $^ $(CONF_KOBO) $(CFLAGS) $(KOBO_CFLAGS) $(LIBS)
+	$(CC) -o $@ $< $(CFLAGS)
 
-KoboRoot: libhidedir_kobo.so
-	mkdir -p $@/etc $@/usr/local/geek1011
-	echo /usr/local/geek1011/$^ > $@/etc/ld.so.preload
-	cp $^ $@/usr/local/geek1011/$^
-
-KoboRoot.tgz: KoboRoot
-	tar cvzf KoboRoot.tgz -C KoboRoot . --group=root:0 --owner=root:0
-	@echo "Warning: To uninstall this, you need SSH or telnet access (unless you want to get fancy with one-time deletion scripts). This will persist past updates."
+ld.so.preload: libhidedir_kobo.so
+	echo $(PREFIX)/$< > $@

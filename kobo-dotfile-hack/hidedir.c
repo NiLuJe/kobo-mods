@@ -13,20 +13,18 @@
 #include <sys/types.h>
 
 #define constructor __attribute__((constructor))
-#define strcasecmp  __builtin_strcasecmp
-#define strncasecmp __builtin_strncasecmp
 
 static bool wrap = true;
 
-static struct dirent   *(*readdir_orig)(DIR *dir);
-static struct dirent64 *(*readdir64_orig)(DIR *dir);
-static int              (*readdir_r_orig)(DIR *dir, struct dirent *ent, struct dirent **res);
-static int              (*readdir64_r_orig)(DIR *dir, struct dirent64 *ent, struct dirent64 **res);
+static __typeof__(readdir)     *readdir_orig;
+static __typeof__(readdir64)   *readdir64_orig;
+static __typeof__(readdir_r)   *readdir_r_orig;
+static __typeof__(readdir64_r) *readdir64_r_orig;
 
 #ifdef USE_FULL_PATH
-static DIR  *(*opendir_orig)(const char *name);
-static DIR  *(*fdopendir_orig)(int fd);
-static int   (*closedir_orig)(DIR *dir);
+static __typeof__(opendir)   *opendir_orig;
+static __typeof__(fdopendir) *fdopendir_orig;
+static __typeof__(closedir)  *closedir_orig;
 static char *dirpaths[1024];    // c.f., cat /proc/$(pidof nickel)/limits
 #endif
 
