@@ -116,7 +116,7 @@ static bool should_hide(DIR *dir __attribute__((unused)), const char *name, cons
         return false;
     }
     if (name[0] == '.') { // hide **/.* (preventing it from being traversed)
-        syslog(LOG_DEBUG, "Hid `%s` from nickel!", name);
+        syslog(LOG_DEBUG, "(dotfile) Hid `%s` from nickel!", name);
         return true;
     } else {
         return false;
@@ -147,7 +147,7 @@ static bool should_hide(DIR *dir, const char *name, const unsigned char type) {
         return false;
     }
     if (name[0] == '.') { // hide **/.* (preventing it from being traversed)
-        syslog(LOG_DEBUG, "Hid `%s/%s` from nickel!", path, name);
+        syslog(LOG_DEBUG, "(dotfile) Hid `%s/%s` from nickel!", path, name);
         return true;
     } else {
         return false;
