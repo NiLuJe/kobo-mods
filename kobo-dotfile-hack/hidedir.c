@@ -158,7 +158,9 @@ DIR *opendir(const char *name) {
         fprintf(stderr, "opendir: `%s`\n", name);
         if (!(dirpaths[fd] = realpath(name, NULL))) {
             dirpaths[fd] = strdup(name);
-            fprintf(stderr, "cached %d -> `%s`\n", fd, name);
+            fprintf(stderr, "cached %d -> `%s` (as-is)\n", fd, name);
+        } else {
+            fprintf(stderr, "cached %d -> `%s` (canonicalized)\n", fd, name);
         }
     }
     errno = err;
@@ -176,7 +178,7 @@ int closedir(DIR* dir) {
     if (!wrap) return closedir_orig(dir);
     int fd;
     if ((fd = dirfd(dir)) > 0 && dirpaths[fd]) {
-        fprintf(stderr, "clsoedir: `%s`\n", dirpaths[fd]);
+        fprintf(stderr, "closedir: `%s`\n", dirpaths[fd]);
         fprintf(stderr, "clearing %d -> `%s`\n", fd, dirpaths[fd]);
         free(dirpaths[fd]);
         dirpaths[fd] = NULL;
