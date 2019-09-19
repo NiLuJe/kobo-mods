@@ -1,8 +1,8 @@
 # Binaries
 libhidedir_*.so
-ld.so.preload
 
-# Packages
+# Package
+ld.so.preload
 KoboRoot.tgz
 
 # KDevelop
