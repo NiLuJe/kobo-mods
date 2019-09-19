@@ -5,6 +5,12 @@ PREFIX  ?= /usr/local/geek1011
 LIBDIR  := $(PREFIX)/lib
 BINDIR  := $(PREFIX)/bin
 CONFIG  := -DUSE_FULL_PATH -DNICKEL_ONLY
+
+# Do we want a global preload?
+ifdef GLOBAL
+	CONFIG += -DUSE_GLOBAL_PRELOAD
+endif
+
 CFLAGS  ?= -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb
 
 override CFLAGS := $(CONFIG) -Wall -Wextra -shared -std=gnu99 -fPIC $(CFLAGS)
@@ -25,13 +31,20 @@ uninstall:
 clean:
 	rm -f libhidedir_kobo.so ld.so.preload KoboRoot.tgz
 
-KoboRoot.tgz: libhidedir_kobo.so ld.so.preload scripts/98-dotfile.rules scripts/dotfile-patch.sh
+ifdef GLOBAL
+KoboRoot.tgz: libhidedir_kobo.so ld.so.preload
+	tar czf $@ $^ --group root:0 --owner root:0 \
+		--transform "s,libhidedir_kobo.so,.$(LIBDIR)/libhidedir_kobo.so," \
+		--transform "s,ld.so.preload,./etc/ld.so.preload,"
+	tar tvf $@
+else
+KoboRoot.tgz: libhidedir_kobo.so scripts/98-dotfile.rules scripts/dotfile-patch.sh
 	tar czf $@ $^ --group root:0 --owner root:0 \
 		--transform "s,libhidedir_kobo.so,.$(LIBDIR)/libhidedir_kobo.so," \
 		--transform "s,scripts/98-dotfile.rules,./etc/udev/rules.d/98-dotfile.rules," \
-		--transform "s,scripts/dotfile-patch.sh,.$(BINDIR)/dotfile-patch.sh," \
-		--transform "s,ld.so.preload,./etc/ld.so.preload,"
+		--transform "s,scripts/dotfile-patch.sh,.$(BINDIR)/dotfile-patch.sh,"
 	tar tvf $@
+endif
 
 libhidedir_kobo.so: hidedir.c
 	$(CC) -o $@ $< $(CFLAGS) $(LIBS)
