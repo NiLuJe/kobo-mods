@@ -59,7 +59,7 @@ constructor static void init() {
     #endif
 }
 
-static bool should_hide(DIR *dir, const char *name);
+static bool should_hide(DIR *dir, const char *name, const unsigned char type);
 
 #define WRAP_READDIR(dirent, readdir)                 \
 struct dirent *readdir(DIR *dir) {                    \
@@ -69,8 +69,8 @@ struct dirent *readdir(DIR *dir) {                    \
     for (;;) {                                        \
         res = readdir##_orig(dir);                    \
         err = errno;                                  \
-        fprintf(stderr, "%s: ", #readdir);            \
-        if (!res || !should_hide(dir, res->d_name)) { \
+        fprintf(stderr, "%s: ", #readdir);  \
+        if (!res || !should_hide(dir, res->d_name, res->d_type)) { \
             errno = err;                              \
             return res;                               \
         }                                             \
@@ -90,7 +90,7 @@ int readdir_r(DIR *dir, struct dirent *ent, struct dirent **res) {      \
         ret = readdir_r##_orig(dir, ent, res);                          \
         err = errno;                                                    \
         fprintf(stderr, "%s: ", #readdir_r);                            \
-        if (ret || !*res || !should_hide(dir, (*res)->d_name)) {        \
+        if (ret || !*res || !should_hide(dir, (*res)->d_name, (*res)->d_type)) {        \
             errno = err;                                                \
             return ret;                                                 \
         }                                                               \
@@ -105,7 +105,7 @@ WRAP_READDIR_R(dirent64, readdir64_r)
 
 #ifndef USE_FULL_PATH
 
-static bool should_hide(DIR *dir, const char *name) {
+static bool should_hide(DIR *dir, const char *name, const unsigned char type) {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) // show **/. **/..
         return false;
     if (strncasecmp(name, ".kobo", 5) == 0) // show **/.kobo*
@@ -117,12 +117,16 @@ static bool should_hide(DIR *dir, const char *name) {
 
 #else
 
-static bool should_hide(DIR *dir, const char *name) {
+static bool should_hide(DIR *dir, const char *name, const unsigned char type) {
     int fd;
     char *path = "";
     if ((fd = dirfd(dir)) > 0 && dirpaths[fd]) {
         path = dirpaths[fd];
         fprintf(stderr, "should_hide\t\t\t\t`%s`\t\ton\t\t`%s`\t?\t", name, path);
+    }
+    if (type != DT_DIR) {
+        fprintf(stderr, "NO (0)\n");
+        return false;
     }
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) { // show **/. **/..
         fprintf(stderr, "NO (1)\n");
