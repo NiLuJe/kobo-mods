@@ -106,13 +106,30 @@ WRAP_READDIR_R(dirent64, readdir64_r)
 #ifndef USE_FULL_PATH
 
 static bool should_hide(DIR *dir, const char *name, const unsigned char type) {
-    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) // show **/. **/..
+    fprintf(stderr, "should_hide\t\t\t\t`%s`\t?\t", name);
+    if (type != DT_DIR) { // show anything that's not a directory
+        fprintf(stderr, "NO (0)\n");
         return false;
-    if (strncasecmp(name, ".kobo", 5) == 0) // show **/.kobo*
+    }
+    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) { // show **/. **/..
+        fprintf(stderr, "NO (1)\n");
         return false;
-    if (strcasecmp(name, ".adobe-digital-editions") == 0) // show **/.adobe-digital-editions
+    }
+    if (strncasecmp(name, ".kobo", 5) == 0) { // show **/.kobo*
+        fprintf(stderr, "NO (3)\n");
         return false;
-    return name[0] == '.'; // hide **/.* (but not everything underneath)
+    }
+    if (strcasecmp(name, ".adobe-digital-editions") == 0) { // show **/.adobe-digital-editions
+        fprintf(stderr, "NO (4)\n");
+        return false;
+    }
+    if (name[0] == '.') { // hide **/.* (but not everything underneath)
+        fprintf(stderr, "YES (5)\n");
+        return true;
+    } else {
+        fprintf(stderr, "NO (5)\n");
+        return false;
+    }
 }
 
 #else
