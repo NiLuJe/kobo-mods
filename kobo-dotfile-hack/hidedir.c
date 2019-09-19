@@ -106,7 +106,7 @@ WRAP_READDIR_R(dirent64, readdir64_r)
 
 #ifndef USE_FULL_PATH
 
-static bool should_hide(DIR *dir, const char *name, const unsigned char type) {
+static bool should_hide(DIR *dir __attribute__((unused)), const char *name, const unsigned char type) {
     syslog(LOG_DEBUG, "should_hide\t\t\t\t`%s`\t?\t", name);
     if (type != DT_DIR) { // show anything that's not a directory
         syslog(LOG_DEBUG, "NO (0)\n");
