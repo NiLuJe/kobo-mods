@@ -118,17 +118,33 @@ static bool should_hide(DIR *dir, const char *name) {
 static bool should_hide(DIR *dir, const char *name) {
     int fd;
     char *path = "";
-    if ((fd = dirfd(dir)) > 0 && dirpaths[fd])
+    if ((fd = dirfd(dir)) > 0 && dirpaths[fd]) {
         path = dirpaths[fd];
-    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) // show **/. **/..
+        fprintf(stderr, "should_hide %s on %s ? ", name, path);
+    }
+    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) { // show **/. **/..
+        fprintf(stderr, "NO\n");
         return false;
-    if (strncasecmp(path, "/mnt/", 5) != 0) // show !/mnt/**
+    }
+    if (strncasecmp(path, "/mnt/", 5) != 0) { // show !/mnt/**
+        fprintf(stderr, "NO\n");
         return false;
-    if (strncasecmp(name, ".kobo", 5) == 0 || strcasestr(path, "/.kobo")) // show **/.kobo*/**
+    }
+    if (strncasecmp(name, ".kobo", 5) == 0 || strcasestr(path, "/.kobo")) { // show **/.kobo*/**
+        fprintf(stderr, "NO\n");
         return false;
-    if (strcasecmp(name, ".adobe-digital-editions") == 0 || strcasestr(path, "/.adobe-digital-editions")) // show **/.adobe-digital-editions/**
+    }
+    if (strcasecmp(name, ".adobe-digital-editions") == 0 || strcasestr(path, "/.adobe-digital-editions")) { // show **/.adobe-digital-editions/**
+        fprintf(stderr, "NO\n");
         return false;
-    return name[0] == '.'; // hide **/.* (but not everything underneath)
+    }
+    if (name[0] == '.') { // hide **/.* (but not everything underneath)
+        fprintf(stderr, "YES\n");
+        return true;
+    } else {
+        fprintf(stderr, "NO\n");
+        return false;
+    }
 }
 
 DIR *opendir(const char *name) {
@@ -136,9 +152,13 @@ DIR *opendir(const char *name) {
     int err, fd;
     DIR *dir = opendir_orig(name);
     err = errno;
-    if (dir && (fd = dirfd(dir)) > 0)
-        if (!(dirpaths[fd] = realpath(name, NULL)))
+    if (dir && (fd = dirfd(dir)) > 0) {
+        fprintf(stderr, "opendir on %s\n", name);
+        if (!(dirpaths[fd] = realpath(name, NULL))) {
             dirpaths[fd] = strdup(name);
+            fprintf(stderr, "cached %d -> %s\n", fd, name);
+        }
+    }
     errno = err;
     return dir;
 }
@@ -154,6 +174,7 @@ int closedir(DIR* dir) {
     if (!wrap) return closedir_orig(dir);
     int fd;
     if ((fd = dirfd(dir)) > 0 && dirpaths[fd]) {
+        fprintf(stderr, "clearing %d -> %s\n", fd, dirpaths[fd]);
         free(dirpaths[fd]);
         dirpaths[fd] = NULL;
     }
