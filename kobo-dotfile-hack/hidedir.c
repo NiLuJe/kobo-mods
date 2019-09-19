@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <syslog.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -69,7 +70,7 @@ struct dirent *readdir(DIR *dir) {                    \
     for (;;) {                                        \
         res = readdir##_orig(dir);                    \
         err = errno;                                  \
-        fprintf(stderr, "%s: ", #readdir);  \
+        syslog(LOG_DEBUG, "%s: ", #readdir);  \
         if (!res || !should_hide(dir, res->d_name, res->d_type)) { \
             errno = err;                              \
             return res;                               \
@@ -89,7 +90,7 @@ int readdir_r(DIR *dir, struct dirent *ent, struct dirent **res) {      \
     for (;;) {                                                          \
         ret = readdir_r##_orig(dir, ent, res);                          \
         err = errno;                                                    \
-        fprintf(stderr, "%s: ", #readdir_r);                            \
+        syslog(LOG_DEBUG, "%s: ", #readdir_r);                            \
         if (ret || !*res || !should_hide(dir, (*res)->d_name, (*res)->d_type)) {        \
             errno = err;                                                \
             return ret;                                                 \
@@ -106,28 +107,28 @@ WRAP_READDIR_R(dirent64, readdir64_r)
 #ifndef USE_FULL_PATH
 
 static bool should_hide(DIR *dir, const char *name, const unsigned char type) {
-    fprintf(stderr, "should_hide\t\t\t\t`%s`\t?\t", name);
+    syslog(LOG_DEBUG, "should_hide\t\t\t\t`%s`\t?\t", name);
     if (type != DT_DIR) { // show anything that's not a directory
-        fprintf(stderr, "NO (0)\n");
+        syslog(LOG_DEBUG, "NO (0)\n");
         return false;
     }
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) { // show **/. **/..
-        fprintf(stderr, "NO (1)\n");
+        syslog(LOG_DEBUG, "NO (1)\n");
         return false;
     }
     if (strncasecmp(name, ".kobo", 5) == 0) { // show **/.kobo*
-        fprintf(stderr, "NO (3)\n");
+        syslog(LOG_DEBUG, "NO (3)\n");
         return false;
     }
     if (strcasecmp(name, ".adobe-digital-editions") == 0) { // show **/.adobe-digital-editions
-        fprintf(stderr, "NO (4)\n");
+        syslog(LOG_DEBUG, "NO (4)\n");
         return false;
     }
     if (name[0] == '.') { // hide **/.* (but not everything underneath)
-        fprintf(stderr, "YES (5)\n");
+        syslog(LOG_DEBUG, "YES (5)\n");
         return true;
     } else {
-        fprintf(stderr, "NO (5)\n");
+        syslog(LOG_DEBUG, "NO (5)\n");
         return false;
     }
 }
@@ -139,33 +140,33 @@ static bool should_hide(DIR *dir, const char *name, const unsigned char type) {
     char *path = "";
     if ((fd = dirfd(dir)) > 0 && dirpaths[fd]) {
         path = dirpaths[fd];
-        fprintf(stderr, "should_hide\t\t\t\t`%s`\t\ton\t\t`%s`\t?\t", name, path);
+        syslog(LOG_DEBUG, "should_hide\t\t\t\t`%s`\t\ton\t\t`%s`\t?\t", name, path);
     }
     if (type != DT_DIR) { // show anything that's not a directory
-        fprintf(stderr, "NO (0)\n");
+        syslog(LOG_DEBUG, "NO (0)\n");
         return false;
     }
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) { // show **/. **/..
-        fprintf(stderr, "NO (1)\n");
+        syslog(LOG_DEBUG, "NO (1)\n");
         return false;
     }
     if (strncasecmp(path, "/mnt/", 5) != 0) { // show !/mnt/**
-        fprintf(stderr, "NO (2)\n");
+        syslog(LOG_DEBUG, "NO (2)\n");
         return false;
     }
     if (strncasecmp(name, ".kobo", 5) == 0 || strcasestr(path, "/.kobo")) { // show **/.kobo*/**
-        fprintf(stderr, "NO (3)\n");
+        syslog(LOG_DEBUG, "NO (3)\n");
         return false;
     }
     if (strcasecmp(name, ".adobe-digital-editions") == 0 || strcasestr(path, "/.adobe-digital-editions")) { // show **/.adobe-digital-editions/**
-        fprintf(stderr, "NO (4)\n");
+        syslog(LOG_DEBUG, "NO (4)\n");
         return false;
     }
     if (name[0] == '.') { // hide **/.* (preventing it from being traversed)
-        fprintf(stderr, "YES (5)\n");
+        syslog(LOG_DEBUG, "YES (5)\n");
         return true;
     } else {
-        fprintf(stderr, "NO (5)\n");
+        syslog(LOG_DEBUG, "NO (5)\n");
         return false;
     }
 }
@@ -176,12 +177,12 @@ DIR *opendir(const char *name) {
     DIR *dir = opendir_orig(name);
     err = errno;
     if (dir && (fd = dirfd(dir)) > 0) {
-        fprintf(stderr, "opendir: `%s`\n", name);
+        syslog(LOG_DEBUG, "opendir: `%s`\n", name);
         if (!(dirpaths[fd] = realpath(name, NULL))) {
             dirpaths[fd] = strdup(name);
-            fprintf(stderr, "cached %d -> `%s` (as-is)\n", fd, name);
+            syslog(LOG_DEBUG, "cached %d -> `%s` (as-is)\n", fd, name);
         } else {
-            fprintf(stderr, "cached %d -> `%s` (canonicalized)\n", fd, name);
+            syslog(LOG_DEBUG, "cached %d -> `%s` (canonicalized)\n", fd, name);
         }
     }
     errno = err;
@@ -199,8 +200,8 @@ int closedir(DIR* dir) {
     if (!wrap) return closedir_orig(dir);
     int fd;
     if ((fd = dirfd(dir)) > 0 && dirpaths[fd]) {
-        fprintf(stderr, "closedir: `%s`\n", dirpaths[fd]);
-        fprintf(stderr, "clearing %d -> `%s`\n", fd, dirpaths[fd]);
+        syslog(LOG_DEBUG, "closedir: `%s`\n", dirpaths[fd]);
+        syslog(LOG_DEBUG, "clearing %d -> `%s`\n", fd, dirpaths[fd]);
         free(dirpaths[fd]);
         dirpaths[fd] = NULL;
     }
