@@ -69,6 +69,7 @@ struct dirent *readdir(DIR *dir) {                    \
     for (;;) {                                        \
         res = readdir##_orig(dir);                    \
         err = errno;                                  \
+        fprintf(stderr, "%s: ", #readdir);            \
         if (!res || !should_hide(dir, res->d_name)) { \
             errno = err;                              \
             return res;                               \
@@ -88,6 +89,7 @@ int readdir_r(DIR *dir, struct dirent *ent, struct dirent **res) {      \
     for (;;) {                                                          \
         ret = readdir_r##_orig(dir, ent, res);                          \
         err = errno;                                                    \
+        fprintf(stderr, "%s: ", #readdir_r);                            \
         if (ret || !*res || !should_hide(dir, (*res)->d_name)) {        \
             errno = err;                                                \
             return ret;                                                 \
@@ -120,29 +122,29 @@ static bool should_hide(DIR *dir, const char *name) {
     char *path = "";
     if ((fd = dirfd(dir)) > 0 && dirpaths[fd]) {
         path = dirpaths[fd];
-        fprintf(stderr, "should_hide %s on %s ? ", name, path);
+        fprintf(stderr, "should_hide\t\t\t\t`%s`\t\ton\t\t`%s`\t?\t", name, path);
     }
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) { // show **/. **/..
-        fprintf(stderr, "NO\n");
+        fprintf(stderr, "NO (1)\n");
         return false;
     }
     if (strncasecmp(path, "/mnt/", 5) != 0) { // show !/mnt/**
-        fprintf(stderr, "NO\n");
+        fprintf(stderr, "NO (2)\n");
         return false;
     }
     if (strncasecmp(name, ".kobo", 5) == 0 || strcasestr(path, "/.kobo")) { // show **/.kobo*/**
-        fprintf(stderr, "NO\n");
+        fprintf(stderr, "NO (3)\n");
         return false;
     }
     if (strcasecmp(name, ".adobe-digital-editions") == 0 || strcasestr(path, "/.adobe-digital-editions")) { // show **/.adobe-digital-editions/**
-        fprintf(stderr, "NO\n");
+        fprintf(stderr, "NO (4)\n");
         return false;
     }
     if (name[0] == '.') { // hide **/.* (but not everything underneath)
-        fprintf(stderr, "YES\n");
+        fprintf(stderr, "YES (5)\n");
         return true;
     } else {
-        fprintf(stderr, "NO\n");
+        fprintf(stderr, "NO (5)\n");
         return false;
     }
 }
@@ -153,10 +155,10 @@ DIR *opendir(const char *name) {
     DIR *dir = opendir_orig(name);
     err = errno;
     if (dir && (fd = dirfd(dir)) > 0) {
-        fprintf(stderr, "opendir on %s\n", name);
+        fprintf(stderr, "opendir: `%s`\n", name);
         if (!(dirpaths[fd] = realpath(name, NULL))) {
             dirpaths[fd] = strdup(name);
-            fprintf(stderr, "cached %d -> %s\n", fd, name);
+            fprintf(stderr, "cached %d -> `%s`\n", fd, name);
         }
     }
     errno = err;
@@ -174,7 +176,8 @@ int closedir(DIR* dir) {
     if (!wrap) return closedir_orig(dir);
     int fd;
     if ((fd = dirfd(dir)) > 0 && dirpaths[fd]) {
-        fprintf(stderr, "clearing %d -> %s\n", fd, dirpaths[fd]);
+        fprintf(stderr, "clsoedir: `%s`\n", dirpaths[fd]);
+        fprintf(stderr, "clearing %d -> `%s`\n", fd, dirpaths[fd]);
         free(dirpaths[fd]);
         dirpaths[fd] = NULL;
     }
