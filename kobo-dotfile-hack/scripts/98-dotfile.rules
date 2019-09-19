@@ -1,0 +1,2 @@
+# It should run close to on-animator, so onboard *should* be mounted
+KERNEL=="loop0", RUN+="/usr/local/geek1011/bin/dotfile-patch.sh"
