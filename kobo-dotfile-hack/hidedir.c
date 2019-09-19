@@ -16,16 +16,16 @@
 
 static bool wrap = true;
 
-static __typeof__(readdir)     *readdir_orig;
-static __typeof__(readdir64)   *readdir64_orig;
-static __typeof__(readdir_r)   *readdir_r_orig;
-static __typeof__(readdir64_r) *readdir64_r_orig;
+static __typeof__(readdir)     *readdir_orig = NULL;
+static __typeof__(readdir64)   *readdir64_orig = NULL;
+static __typeof__(readdir_r)   *readdir_r_orig = NULL;
+static __typeof__(readdir64_r) *readdir64_r_orig = NULL;
 
 #ifdef USE_FULL_PATH
-static __typeof__(opendir)   *opendir_orig;
-static __typeof__(fdopendir) *fdopendir_orig;
-static __typeof__(closedir)  *closedir_orig;
-static char *dirpaths[1024];    // c.f., cat /proc/$(pidof nickel)/limits
+static __typeof__(opendir)   *opendir_orig = NULL;
+static __typeof__(fdopendir) *fdopendir_orig = NULL;
+static __typeof__(closedir)  *closedir_orig = NULL;
+static char *dirpaths[1024] = { 0 };    // c.f., cat /proc/$(pidof nickel)/limits
 #endif
 
 #if defined(NICKEL_ONLY) || defined(LS_ONLY)
