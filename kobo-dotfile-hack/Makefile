@@ -1,12 +1,15 @@
 .PHONY: kobo clean run
 
-CC = $(CROSS_COMPILE)gcc
+CC := $(CROSS_TC)-gcc
 
-override CFLAGS := -Wall -shared -ldl -pedantic -std=c99 -fPIC $(CFLAGS)
+override CFLAGS := -Wall -Wextra -shared -fPIC $(CFLAGS)
 KOBO_CFLAGS     ?= -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb
+LIBS := -ldl
 
-CONF_NATIVE = -DLS_ONLY
-CONF_KOBO   = -DUSE_FULL_PATH -DNICKEL_ONLY
+CONF_NATIVE := -DLS_ONLY
+CONF_KOBO   := -DUSE_FULL_PATH
+#CONF_KOBO   += -DNICKEL_ONLY
+
 
 run: libhidedir.so
 	@echo "=== without ==="
@@ -18,14 +21,14 @@ run: libhidedir.so
 kobo: KoboRoot.tgz
 
 clean:
-	rm -f libhidedir.so KoboRoot.tgz
+	rm -f libhidedir.so libhidedir_kobo.so KoboRoot.tgz
 	rm -rf KoboRoot
 
 libhidedir.so: hidedir.c
-	$(CC) -o $@ $^ $(CONF_NATIVE) $(CFLAGS)
+	$(CC) -o $@ $^ $(CONF_NATIVE) $(CFLAGS) $(LIBS)
 
 libhidedir_kobo.so: hidedir.c
-	$(CC) -o $@ $^ $(CONF_KOBO) $(CFLAGS) $(KOBO_CFLAGS)
+	$(CC) -o $@ $^ $(CONF_KOBO) $(CFLAGS) $(KOBO_CFLAGS) $(LIBS)
 
 KoboRoot: libhidedir_kobo.so
 	mkdir -p $@/etc $@/usr/local/geek1011

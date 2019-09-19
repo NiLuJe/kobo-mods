@@ -47,8 +47,6 @@ constructor static void init() {
     wrap = isproc("ls");
     #endif
 
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
     readdir_orig     = dlsym(RTLD_NEXT, "readdir");
     readdir64_orig   = dlsym(RTLD_NEXT, "readdir64");
     readdir_r_orig   = dlsym(RTLD_NEXT, "readdir_r");
@@ -59,7 +57,6 @@ constructor static void init() {
     fdopendir_orig   = dlsym(RTLD_NEXT, "fdopendir");
     closedir_orig    = dlsym(RTLD_NEXT, "closedir");
     #endif
-    #pragma GCC diagnostic pop
 }
 
 static bool should_hide(DIR *dir, const char *name);
