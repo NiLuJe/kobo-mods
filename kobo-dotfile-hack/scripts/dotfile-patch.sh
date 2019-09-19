@@ -10,7 +10,7 @@ fi
 PRE_PATT='# dotfile-hack-pre-start\nif [ -f /usr/local/geek1011/lib/libhidedir_kobo.so ] && [ ! -f /etc/ld.so.preload ] ; then\n\texport LD_PRELOAD=/usr/local/geek1011/lib/libhidedir_kobo.so\nfi\n# dotfile-hack-pre-end'
 
 # The code snippet we want to inject *after* nickel's startup
-POST_PATT='# dotfile-hack-post-start\nunset LD_PRELOAD\n# dotfile-hack-post-end'
+POST_PATT='# dotfile-hack-post-start\\nunset LD_PRELOAD\\n# dotfile-hack-post-end'
 
 # Remember if we actually patched something
 PATCH_DONE="false"
@@ -22,7 +22,8 @@ if ! grep -q dotfile-hack-pre-start rcS ; then
 	PATCH_DONE="true"
 
 	# Do eeeet!
-	sed "/\/usr\/local\/Kobo\/nickel/i ${PRE_PATT}" -i rcS
+	sed "/\/usr\/local\/Kobo\/nickel/i #%PRE_PATT%" -i rcS
+	sed -e "s:%PRE_PATT%:${PRE_PATT}:" -i rcS
 fi
 
 # Do we need to patch?
