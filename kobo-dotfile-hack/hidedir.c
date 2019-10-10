@@ -12,6 +12,9 @@
 #include <syslog.h>
 #include <unistd.h>
 
+// NOTE: GNU extension!
+extern char* program_invocation_short_name;
+
 #define constructor __attribute__((constructor))
 
 static bool wrap = true;
@@ -40,11 +43,7 @@ static char* dirpaths[1024]                  = { 0 };    // Linux default is 102
 static bool
     isproc(const char* proc)
 {
-	char buf[PATH_MAX] = { 0 };
-	if (readlink("/proc/self/exe", buf, PATH_MAX) != -1) {
-		return strcmp(strrchr(buf, '/') + 1, proc) == 0;
-	}
-	return false;
+	return strcmp(program_invocation_short_name, proc) == 0;
 }
 #endif
 
