@@ -13,7 +13,7 @@ endif
 
 CFLAGS  ?= -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -mthumb
 
-override CFLAGS := $(CONFIG) -Wall -Wextra -shared -std=gnu99 -fPIC $(CFLAGS)
+override CFLAGS := $(CONFIG) -Wall -Wextra -shared -fPIC $(CFLAGS)
 LIBS := -ldl
 
 .PHONY: all install uninstall clean scripts/98-dotfile.rules scripts/dotfile-patch.sh
