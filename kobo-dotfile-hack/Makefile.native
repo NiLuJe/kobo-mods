@@ -2,7 +2,7 @@ CC      := $(CROSS_TC)-gcc
 STRIP   ?= $(CROSS_TC)-strip
 CONFIG  := -DLS_ONLY
 
-override CFLAGS := $(CONFIG) -Wall -Wextra -shared -std=gnu99 -fPIC $(CFLAGS)
+override CFLAGS := $(CONFIG) -Wall -Wextra -shared -fPIC $(CFLAGS)
 LIBS := -ldl
 
 .PHONY: all clean test
