@@ -1,4 +1,4 @@
-#define _GNU_SOURCE    // for RTLD_NEXT
+#define _GNU_SOURCE    // for RTLD_NEXT, program_invocation_short_name
 #include <dirent.h>
 #include <dlfcn.h>
 #include <errno.h>
@@ -11,9 +11,6 @@
 #include <sys/types.h>
 #include <syslog.h>
 #include <unistd.h>
-
-// NOTE: GNU extension!
-extern char* program_invocation_short_name;
 
 #define constructor __attribute__((constructor))
 
